@@ -8,7 +8,7 @@
            (getenv "PYTHONPATH") path-separator
            (concat epy-install-dir "python-libs/")))
   (pymacs-load "ropemacs" "rope-")
-  
+
   ;; Stops from erroring if there's a syntax err
   (setq ropemacs-codeassist-maxfixes 3)
   (setq ropemacs-guess-project t)
@@ -75,12 +75,6 @@
      ;;
      ;;    (flymake-add-checker flymake-newchecker-init)
 
-     (require 'tramp)
-     ;; Utilities that increase legibility and reduce code duplication
-     (defun current-file-remotep ()
-       "Tell if the file is remote"
-       (subsetp (list (current-buffer)) (tramp-list-remote-buffers)))
-
      (defun flymake-create-copy-file ()
        "Create a copy local file"
        (let* ((temp-file (flymake-init-create-temp-buffer-copy 
@@ -93,10 +87,8 @@
        "Setup the command to be used with flymake, the command
 will be called in this way: COMMAND OPTIONS FILE The FILE varible
 is passed after the options."
-       ;; Make sure it's not a remote buffer or flymake would not work
-       (when (not (current-file-remotep)) 
          (list command
-               (append options (list (flymake-create-copy-file))))))
+               (append options (list (flymake-create-copy-file)))))
 
      (when (require 'flymake "flymake-patch" t)
        (setq flymake-info-line-regex
