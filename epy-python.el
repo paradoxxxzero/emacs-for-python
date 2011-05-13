@@ -25,19 +25,46 @@
                     )))
   )
 
-;; Customizing
-(defcustom flymake-enable-pyflakes nil
-  "Enable the pyflakes syntax checking, requires pyflakes command in path"
-  :type 'boolean
-  :options '(t nil))
-(defcustom flymake-enable-pylint nil
-  "Enable the pylint syntax checking, requires pylint command in path"
-  :type 'boolean
-  :options '(t nil))
-(defcustom flymake-enable-pep8 nil
-  "Enable the pep8 syntax checking, requires pep8 command in path"
-  :type 'boolean
-  :options '(t nil))
+
+
+;;=========================================================
+;; Flymake additions, I have to put this one somwhere else?
+;;=========================================================
+
+(defun flymake-create-copy-file ()
+  "Create a copy local file"
+  (let* ((temp-file (flymake-init-create-temp-buffer-copy 
+                     'flymake-create-temp-inplace)))
+    (file-relative-name 
+     temp-file 
+     (file-name-directory buffer-file-name))))     
+
+(defun flymake-command-parse (cmdline)
+  "Parses the command line CMDLINE in a format compatible
+       with flymake, as:(list cmd-name arg-list)
+
+The CMDLINE should be something like:
+
+ flymake %f python custom.py %f
+
+%f will be substituted with a temporary copy of the file that is
+ currently being checked.
+"
+  (let ((cmdline-subst (replace-regexp-in-string "%f" (flymake-create-copy-file) cmdline)))
+    (setq cmdline-subst (split-string-and-unquote cmdline-subst))
+    (list (first cmdline-subst) (rest cmdline-subst))
+    ))
+
+
+(when (require 'flymake "flymake-patch" t)
+  (setq flymake-info-line-regex
+        (append flymake-info-line-regex '("unused$" "^redefinition" "used$"))))
+
+(defun epy-setup-checker (cmdline)
+  (add-to-list 'flymake-allowed-file-name-masks
+               (list "\\.py\\'" (apply-partially 'flymake-command-parse cmdline)))
+  )
+
 
 ;; Python or python mode?
 (eval-after-load 'python
@@ -54,7 +81,6 @@
        "Activate a Virtual Environment specified by PATH" t)
      (autoload 'virtualenv-workon "virtualenv"
        "Activate a Virtual Environment present using virtualenvwrapper" t)
-     
      
      ;;==================================================
      ;; Flymake for python configuration
@@ -121,14 +147,7 @@ is passed after the options."
      (add-hook 'python-mode-hook 'flymake-find-file-hook)
 
      
-     (when flymake-enable-pyflakes
-       (flymake-add-checker 'flymake-pyflakes-init))
-
-     (when flymake-enable-pylint
-       (flymake-add-checker 'flymake-pylint-init))
-
-     (when flymake-enable-pep8
-       (flymake-add-checker 'flymake-pep8-init)))
+     )
   )
 ;; Cython Mode
 (autoload 'cython-mode "cython-mode" "Mode for editing Cython source files")
