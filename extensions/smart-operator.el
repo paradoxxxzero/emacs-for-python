@@ -163,10 +163,10 @@ When ONLY-AFTER, insert space at back only."
         (t
          (smart-operator-insert ":" t))))
 
-(defun smart-operator-, ()
-  "See `smart-operator-insert'."
-  (interactive)
-  (smart-operator-insert "," t))
+;; (defun smart-operator-, ()
+;;   "See `smart-operator-insert'."
+;;   (interactive)
+;;   (smart-operator-insert "," t))
 
 (defun smart-operator-. ()
   "See `smart-operator-insert'."
